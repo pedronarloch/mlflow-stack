@@ -5,7 +5,7 @@ description = "Self-hosted MLflow tracking server with PostgreSQL and MinIO"
 readme = "../README.md"
 requires-python = ">=3.13"
 authors = [
-    { name = "Your Name", email = "your.email@example.com" }
+    { name = "Pedro Narloch", email = "pedro.narloch@gmail.com" }
 ]
 license = { text = "MIT" }
 keywords = ["mlflow", "machine-learning", "ml-ops", "experiment-tracking"]
