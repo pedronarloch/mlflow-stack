@@ -9,4 +9,10 @@ wheels/
 # Virtual environments
 .venv
 
+# Localstack volume
+volume
+
+# Secrets
 .env
+
+

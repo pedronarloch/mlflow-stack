@@ -13,32 +13,16 @@ services:
       - postgres_data:/var/lib/postgresql
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  minio:
-    image: quay.io/minio/minio
-    container_name: minio
-    restart: always
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
+    image: localstack/localstack:s3-latest
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:4566:4566"
     environment:
-      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
-      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_ACCESS_KEY}
-      - MINIO_STORAGE_USE_HTTPS=${MINIO_STORAGE_USE_HTTPS}
-    command: server /data --console-address ":9001"
+      - DEBUG=${DEBUG:-0}
     volumes:
-      - minio_data:/data
-    
-  minio-setup:
-    image: quay.io/minio/mc
-    depends_on:
-      - minio
-    volumes:
-      - ./minio/create-bucket.sh:/create-bucket.sh
-    entrypoint: /bin/sh
-    command: -c "chmod +x /create-bucket.sh && /create-bucket.sh"
-    environment:
-      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
-      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_ACCESS_KEY}
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
   
   mlflow:
     image: mlflow_server
@@ -48,9 +32,9 @@ services:
     ports:
       - "5001:5001"
     environment:
-      - AWS_ACCESS_KEY_ID=${MINIO_ACCESS_KEY}
-      - AWS_SECRET_ACCESS_KEY=${MINIO_SECRET_ACCESS_KEY}
-      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - MLFLOW_S3_ENDPOINT_URL=http://localstack:4566
       - MLFLOW_S3_IGNORE_TLS=true
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -64,9 +48,8 @@ services:
       --artifacts-destination s3://mlflow
     depends_on:
       - postgres
-      - minio-setup
+      - localstack
 
 volumes:
   postgres_data:
-  minio_data:
 
