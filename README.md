@@ -64,8 +64,8 @@ The project consists of three Docker services:
 
 ### LocalStack
 - **Port**: 4566
-- **Bucket**: `mlflow` (used for artifact storage)
-- **Data persistence**: `./volume` directory
+- **Bucket**: `mlflow` (auto-created on startup via `localstack/setup-s3-bucket.sh`)
+- **Data persistence**: `./volume` directory (enabled via `PERSISTENCE=1`)
 
 ### MLflow
 - **Port**: 5001
